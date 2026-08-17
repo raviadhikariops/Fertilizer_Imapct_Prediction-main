@@ -1,0 +1,161 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ app_name }} | {{ t('Yield Planner') }}{% endblock %}
+{% block content %}
+<section class="workspace">
+    <div class="page-heading home-hero">
+        <div>
+            <p class="eyebrow">AgriNexus AN</p>
+            <h1>{{ t('Plan your next harvest') }}</h1>
+            <p class="muted">Estimate yield, compare fertilizer fit, rank crop options, and manage field decisions inside a private farm workspace.</p>
+            <div class="hero-badges">
+                <span class="tag score">Gemini primary</span>
+                <span class="tag">Groq fallback ready</span>
+                <span class="tag">History</span>
+            </div>
+            <div class="hero-actions">
+                <a class="button" href="{{ url_for('index', crop='Wheat', soil='Loamy', fertilizer='Urea', amount=80, weather='Sunny', location='Punjab', nitrogen=60, phosphorus=40, potassium=30, ph=6.5, temperature=24, humidity=65, rainfall=120, moisture=45, provider='hybrid') }}">Load Example</a>
+            </div>
+        </div>
+        <img src="{{ url_for('static', filename='images/crop-planning.jpg') }}" alt="Plan your crop">
+    </div>
+
+    {% if error %}
+    <div class="alert error">{{ error }}</div>
+    {% endif %}
+
+    <div class="layout-grid">
+        <section class="panel">
+            <form action="{{ url_for('predict') }}" method="post" class="form-grid compact">
+                <div class="field-group">
+                    <label for="crop">{{ t('Crop') }}</label>
+                    <select id="crop" name="crop" required>
+                        {% for crop in crops %}
+                        <option value="{{ crop }}" {% if initial_values.crop == crop %}selected{% endif %}>{{ crop }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="soil">{{ t('Soil') }}</label>
+                    <select id="soil" name="soil" required>
+                        {% for soil in soils %}
+                        <option value="{{ soil }}" {% if initial_values.soil == soil %}selected{% endif %}>{{ soil }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="fertilizer">{{ t('Fertilizer') }}</label>
+                    <select id="fertilizer" name="fertilizer" required>
+                        {% for fertilizer in fertilizers %}
+                        <option value="{{ fertilizer }}" {% if initial_values.fertilizer == fertilizer %}selected{% endif %}>{{ fertilizer }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field-group">
+                    <label for="amount">{{ t('Fertilizer amount (kg/ha)') }}</label>
+                    <input id="amount" name="amount" type="number" step="0.01" min="0" value="{{ initial_values.amount }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="weather">{{ t('Weather') }}</label>
+                    <input id="weather" name="weather" type="text" value="{{ initial_values.weather }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="location">{{ t('Location') }}</label>
+                    <input id="location" name="location" type="text" value="{{ initial_values.location }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="nitrogen">{{ t('Nitrogen (N)') }}</label>
+                    <input id="nitrogen" name="nitrogen" type="number" step="0.01" min="0" value="{{ initial_values.nitrogen }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="phosphorus">{{ t('Phosphorus (P)') }}</label>
+                    <input id="phosphorus" name="phosphorus" type="number" step="0.01" min="0" value="{{ initial_values.phosphorus }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="potassium">{{ t('Potassium (K)') }}</label>
+                    <input id="potassium" name="potassium" type="number" step="0.01" min="0" value="{{ initial_values.potassium }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="ph">{{ t('Soil pH') }}</label>
+                    <input id="ph" name="ph" type="number" step="0.01" min="0" value="{{ initial_values.ph }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="temperature">{{ t('Temperature (°C)') }}</label>
+                    <input id="temperature" name="temperature" type="number" step="0.01" value="{{ initial_values.temperature }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="humidity">{{ t('Humidity (%)') }}</label>
+                    <input id="humidity" name="humidity" type="number" step="0.01" min="0" value="{{ initial_values.humidity }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="rainfall">{{ t('Rainfall (mm)') }}</label>
+                    <input id="rainfall" name="rainfall" type="number" step="0.01" min="0" value="{{ initial_values.rainfall }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="moisture">{{ t('Moisture (%)') }}</label>
+                    <input id="moisture" name="moisture" type="number" step="0.01" min="0" value="{{ initial_values.moisture }}" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="provider">{{ t('Provider') }}</label>
+                    <select id="provider" name="provider">
+                        <option value="local" {% if initial_values.provider == 'local' %}selected{% endif %}>{{ t('Local data only') }}</option>
+                        <option value="hybrid" {% if initial_values.provider == 'hybrid' %}selected{% endif %}>{{ t('Data + AI (recommended)') }}</option>
+                        <option value="ai" {% if initial_values.provider == 'ai' %}selected{% endif %}>{{ t('AI only') }}</option>
+                    </select>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="button">{{ t('Generate plan') }}</button>
+                </div>
+            </form>
+        </section>
+
+        <aside class="panel">
+            <div class="section-heading">
+                <p class="eyebrow">AgriNexus</p>
+                <h2>{{ t('Estimate yield') }}</h2>
+            </div>
+            <p class="muted">Estimate yield, compare fertilizer fit, rank crop options, and manage field decisions inside a private farm workspace.</p>
+            <div class="panel-card">
+                <h3>{{ t('Quick tips') }}</h3>
+                <ul>
+                    <li>{{ t('Use accurate NPK values for better recommendations.') }}</li>
+                    <li>{{ t('Hybrid provider adds AI suggestions but may take a few seconds.') }}</li>
+                    <li>{{ t('You can load example values from saved plans.') }}</li>
+                </ul>
+            </div>
+
+            <div class="panel-card">
+                <h3>History</h3>
+                <dl class="detail-list">
+                    <div>
+                        <dt>Total Plans</dt>
+                        <dd>{{ metrics.total or 0 }}</dd>
+                    </div>
+                    <div>
+                        <dt>Most Planned Crop</dt>
+                        <dd>{{ metrics.top_crop or 'No records' }}</dd>
+                    </div>
+                    <div>
+                        <dt>Average Confidence</dt>
+                        <dd>{{ metrics.avg_confidence or 0 }}%</dd>
+                    </div>
+                </dl>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} | {{ t('History') }}{% endblock %}
+{% block content %}
+<section class="workspace">
+    <div class="page-heading plain">
+        <div>
+            <p class="eyebrow">{{ t('Decision history') }}</p>
+            <h1>{{ t('Saved Predictions') }}</h1>
+        </div>
+        <a class="button secondary" href="{{ url_for('export_predictions') }}">{{ t('Export CSV') }}</a>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat"><span>{{ t('Total') }}</span><strong>{{ metrics.total }}</strong></div>
+        <div class="stat"><span>{{ t('Top Crop') }}</span><strong>{{ metrics.top_crop }}</strong></div>
+        <div class="stat"><span>{{ t('Avg Confidence') }}</span><strong>{{ metrics.avg_confidence }}%</strong></div>
+        <div class="stat"><span>{{ t('High Risk') }}</span><strong>{{ metrics.risk_counts.get("High", 0) }}</strong></div>
+    </div>
+
+    <section class="panel">
+        {% if predictions %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>{{ t('Crop') }}</th>
+                        <th>{{ t('Soil') }}</th>
+                        <th>{{ t('Type') }}</th>
+                        <th>{{ t('Fertilizer') }}</th>
+                        <th>{{ t('Yield') }}</th>
+                        <th>{{ t('Risk') }}</th>
+                        <th>{{ t('Confidence') }}</th>
+                        <th>{{ t('Saved') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prediction in predictions %}
+                    <tr>
+                        <td><a href="{{ url_for('prediction_detail', prediction_id=prediction.id) }}">#{{ prediction.id }}</a></td>
+                        <td>{{ prediction.crop }}</td>
+                        <td>{{ prediction.soil }}</td>
+                        <td>{{ prediction.prediction_type_label }}</td>
+                        <td>{{ prediction.fertilizer }}</td>
+                        <td>{{ prediction.predicted_yield_display }}</td>
+                        <td><span class="risk {{ (prediction.risk_level or 'unrated')|lower }}">{{ prediction.risk_level or "Unrated" }}</span></td>
+                        <td>{{ prediction.confidence or 0 }}%</td>
+                        <td>{{ prediction.created_at or "-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="muted">{{ t('No saved predictions yet.') }}</p>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} | {{ t('Register') if mode == 'register' else t('Login') if mode == 'login' else t('Forgot Password') if mode == 'forgot_password' else t('Reset Password') }}{% endblock %}
+{% block content %}
+<section class="auth-shell">
+    <div class="auth-visual">
+        <p class="eyebrow">{{ t('Secure farm workspace') }}</p>
+        <h1>{{ t('Create your account') if mode == 'register' else t('Welcome back') if mode == 'login' else t('Reset your access') }}</h1>
+        <p>
+            {{ t('Manage field plans, chatbot conversations, recommendation history, and exports from one private dashboard.') }}
+        </p>
+        <div class="mini-metrics">
+            <span>{{ t('Yield plans') }}</span>
+            <span>{{ t('Crop fit') }}</span>
+            <span>{{ t('AI advisor') }}</span>
+        </div>
+    </div>
+
+    <form class="auth-card" method="POST" action="{{ url_for('register') if mode == 'register' else url_for('login') if mode == 'login' else url_for('forgot_password') if mode == 'forgot_password' else url_for('reset_password') }}">
+        <p class="eyebrow">{{ t('Register') if mode == 'register' else t('Login') if mode == 'login' else t('Forgot Password') if mode == 'forgot_password' else t('Reset Password') }}</p>
+        <h2>{{ t('Start managing fields') if mode == 'register' else t('Access your workspace') if mode == 'login' else t('Recover your account') }}</h2>
+        {% if error %}
+        <div class="alert error">{{ error }}</div>
+        {% endif %}
+        {% if success %}
+        <div class="alert notice">{{ success }}</div>
+        {% endif %}
+        {% if mode == "register" %}
+        <label>{{ t('Name') }}
+            <input type="text" name="name" autocomplete="name" required>
+        </label>
+        <label>{{ t('Email') }}
+            <input type="email" name="email" autocomplete="email" required>
+        </label>
+        <label>{{ t('Password') }}
+            <input type="password" name="password" autocomplete="new-password" required>
+        </label>
+        <label>{{ t('Farm Name') }}
+            <input type="text" name="farm_name" autocomplete="organization">
+        </label>
+        <label>{{ t('Location') }}
+            <input type="text" name="location" autocomplete="address-level2">
+        </label>
+        {% endif %}
+        {% if mode in ["forgot_password", "reset_password", "login"] %}
+        <label>{{ t('Email') }}
+            <input type="email" name="email" autocomplete="email" value="{{ email or '' }}" required>
+        </label>
+        {% endif %}
+        {% if mode == "login" %}
+        <label>{{ t('Password') }}
+            <input type="password" name="password" autocomplete="current-password" required>
+        </label>
+        {% endif %}
+        {% if mode == "reset_password" %}
+        <label>OTP
+            <input type="text" name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required>
+        </label>
+        <label>{{ t('New Password') }}
+            <input type="password" name="new_password" autocomplete="new-password" required>
+        </label>
+        {% endif %}
+        {% if mode == "forgot_password" %}
+        <button type="submit">{{ t('Send OTP') }}</button>
+        {% elif mode == "reset_password" %}
+        <button type="submit">{{ t('Reset Password') }}</button>
+        {% elif mode == "register" %}
+        <button type="submit">{{ t('Create Account') }}</button>
+        {% else %}
+        <button type="submit">{{ t('Login') }}</button>
+        {% endif %}
+        {% if mode == "register" %}
+        <p class="muted">{{ t('Already have an account?') }} <a href="{{ url_for('login') }}">{{ t('Login') }}</a></p>
+        {% elif mode == "login" %}
+        <p class="muted">{{ t('New here?') }} <a href="{{ url_for('register') }}">{{ t('Create an account') }}</a></p>
+        <p class="muted"><a href="{{ url_for('forgot_password') }}">{{ t('Forgot password?') }}</a></p>
+        {% elif mode == "forgot_password" %}
+        <p class="muted">{{ t('Remembered it?') }} <a href="{{ url_for('login') }}">{{ t('Back to login') }}</a></p>
+        {% elif mode == "reset_password" %}
+        <p class="muted">{{ t('Enter the OTP sent to your email.') }} <a href="{{ url_for('forgot_password') }}">{{ t('Request another') }}</a></p>
+        {% endif %}
+        {% if mode == "reset_password" and otp %}
+        <p class="muted">OTP: {{ otp }}</p>
+        {% endif %}
+    </form>
+</section>
+{% endblock %}

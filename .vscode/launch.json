@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Flask App",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/run_server.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "FLASK_APP": "app.py",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    }
+  ]
+}

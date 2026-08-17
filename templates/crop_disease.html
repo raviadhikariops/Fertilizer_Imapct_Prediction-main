@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} | {{ t('Crop Disease Detection') }}{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='disease_style.css') }}">
+{% endblock %}
+{% block content %}
+<section class="workspace narrow">
+    <div class="page-heading plain">
+        <div>
+            <p class="eyebrow">{{ t('Deep learning diagnosis') }}</p>
+            <h1>{{ t('Crop Disease Detection') }}</h1>
+            <p class="lead">
+                {{ t('Upload a leaf photo to detect diseases using trained deep learning models.') }}
+                {{ t('Supported crops:') }} <strong>{{ crops|join(", ") }}</strong>
+            </p>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="alert error">{{ error }}</div>
+    {% endif %}
+
+    <div class="disease-layout">
+        <form method="POST" enctype="multipart/form-data" class="disease-upload-area">
+            <div class="upload-icon">🌿</div>
+            <p class="muted">{{ t('Select the crop type and upload a clear leaf image') }}</p>
+
+            <div>
+                <p class="eyebrow crop-select-heading">{{ t('Select Crop') }}</p>
+                <div class="crop-select-grid">
+                    {% for crop in crops %}
+                    <label>
+                        <input type="radio" name="crop" value="{{ crop }}" required>
+                        <span>{{ crop|title }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <label class="file-upload-label">{{ t('Upload leaf image') }}
+                <input type="file" name="file" accept="image/*" required>
+            </label>
+
+            <button type="submit" class="disease-submit-button">
+                {{ t('Detect Disease') }}
+            </button>
+        </form>
+
+        {% if result %}
+        <div class="disease-result-card">
+            <span class="result-label">{{ t('Diagnosis Result') }}</span>
+            <div class="disease-name">{{ result }}</div>
+            {% if result.lower() == "healthy" %}
+            <div class="disease-status healthy">✅ {{ t('Healthy Crop') }}</div>
+            {% else %}
+            <div class="disease-status diseased">⚠️ {{ t('Disease Detected') }}</div>
+            {% endif %}
+            {% if treatment %}
+            <div class="treatment-box">
+                <h3>{{ t('Treatment Advice') }}</h3>
+                <ol>
+                    {% for step in treatment %}
+                    <li>{{ step }}</li>
+                    {% endfor %}
+                </ol>
+                {% if fertilizer %}
+                <p><strong>{{ t('Suggested fertilizer:') }}</strong> {{ fertilizer }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% if image_file %}
+            <img class="disease-preview" src="{{ url_for('uploaded_file', filename=image_file) }}" alt="Uploaded leaf image">
+            {% endif %}
+            <a class="button secondary" href="{{ url_for('crop_disease') }}">{{ t('Analyze Another') }}</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

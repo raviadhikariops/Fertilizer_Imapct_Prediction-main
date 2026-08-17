@@ -1,0 +1,159 @@
+/* General body styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* Header styling */
+header {
+    background-color: #13dc4c;
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    font-size: 2em;
+    margin: 0;
+}
+
+nav {
+    margin-top: 10px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+nav ul li {
+    display: inline;
+}
+
+nav ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 1em;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+nav ul li a.active,
+nav ul li a:hover {
+    background-color: #0fa836;
+}
+
+/* Main section */
+main {
+    padding: 20px;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+/* Table header styling */
+thead {
+    background-color: #4CAF50;
+    color: white;
+}
+
+th {
+    padding: 15px;
+    text-align: left;
+    font-size: 1em;
+    font-weight: bold;
+}
+
+/* Table body styling */
+tbody {
+    background-color: #fff;
+}
+
+td {
+    padding: 15px;
+    text-align: left;
+    font-size: 0.9em;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Special column colors */
+td:nth-child(1) {
+    background-color: #1a92a5; /* Light blue */
+    color: white;
+    font-weight: bold;
+}
+
+td:nth-child(2) {
+    background-color: #FFF9C4; /* Light yellow */
+}
+
+td:nth-child(3) {
+    background-color: #FFEBEE; /* Light red */
+}
+
+td:nth-child(4) {
+    background-color: #E8F5E9; /* Light green */
+}
+
+td:nth-child(5) {
+    background-color: #FFF3E0; /* Light orange */
+}
+
+td:nth-last-child(2) {
+    background-color: #38f141; /* Bright green */
+    font-weight: bold;
+}
+
+td:nth-last-child(1) {
+    background-color: #5c43ff; /* Vibrant purple */
+    color: white;
+}
+
+/* Alternating row colors */
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Hover effect for rows */
+tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* No data message styling */
+.no-data {
+    text-align: center;
+    font-size: 1.5em;
+    color: #888;
+    margin-top: 30px;
+}
+
+/* Footer styling */
+footer {
+    background-color: #13dc4c;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 20px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9em;
+}

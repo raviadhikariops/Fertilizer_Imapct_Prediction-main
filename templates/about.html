@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} | {{ t('About') }}{% endblock %}
+{% block content %}
+<section class="workspace narrow">
+    <div class="panel about-panel">
+        <p class="eyebrow">{{ t('About') }}</p>
+        <h1>{{ app_name }}</h1>
+        <p>
+            {{ app_name }} {{ t('combines fertilizer impact prediction, crop recommendation, nutrient planning, chatbot assistance, and account-based decision history in one Flask application.') }}
+        </p>
+        <p>
+            {{ t('The app uses local agronomic scoring, stores each user\'s plans in SQLite, exports decisions as CSV, and adds Gemini-first AI notes with Groq fallback when API keys are available.') }}
+        </p>
+    </div>
+</section>
+{% endblock %}

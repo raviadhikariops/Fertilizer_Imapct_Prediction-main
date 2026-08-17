@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}{{ app_name }} | {{ t('Saved field plan') }} {{ prediction.id }}{% endblock %}
+
+{% block content %}
+
+<section class="workspace">
+    <div class="page-heading plain">
+        <div>
+            <p class="eyebrow">{{ t('Saved field plan') }}</p>
+            <h1>{{ prediction.crop }} on {{ prediction.soil }} soil</h1>
+        </div>
+        <a class="button secondary" href="{{ url_for('yield_planner') }}">{{ t('New Plan') }}</a>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat">
+            <span>{{ t('Yield Range') }}</span>
+            <strong>{{ prediction.predicted_yield_display or 'Not available' }}</strong>
+        </div>
+        <div class="stat">
+            <span>{{ t('Risk') }}</span>
+            <strong>{{ prediction.risk_level or 'Unrated' }}</strong>
+        </div>
+        <div class="stat">
+            <span>{{ t('Confidence') }}</span>
+            <strong>{{ prediction.confidence or 0 }}%</strong>
+        </div>
+        <div class="stat">
+            <span>{{ t('Fertilizer') }}</span>
+            <strong>{{ prediction.fertilizer or 'Not specified' }}</strong>
+        </div>
+    </div>
+
+    <div class="layout-grid">
+        <section class="panel">
+            <div class="section-heading">
+                <p class="eyebrow">{{ t('Action plan') }}</p>
+                <h2>{{ t('Recommended Next Steps') }}</h2>
+            </div>
+            {% set rec = prediction.recommendation_data %}
+            {% if rec and rec.yield %}
+            {% if rec.yield.summary %}
+            <p class="lead">{{ rec.yield.summary }}</p>
+            {% endif %}
+            {% if rec.yield.actions %}
+            <div class="action-list">{%- for action in rec.yield.actions -%}<div class="action-item">{{ action }}</div>{%- endfor -%}</div>
+            {% endif %}
+            {% else %}
+            <div class="empty-state">{{ t('No yield recommendations are available for this plan.') }}</div>
+            {% endif %}
+
+            {% if rec and rec.fertilizer %}
+            <div class="sub-panel">
+                <h3>{{ rec.fertilizer.fertilizer or prediction.fertilizer or 'Fertilizer' }} {{ t('Fertilizer') }}</h3>
+                {% if rec.fertilizer.summary %}<p>{{ rec.fertilizer.summary }}</p>{% endif %}
+                {% if rec.fertilizer.timing %}<p class="muted"><strong>{{ t('Timing') }}:</strong> {{ rec.fertilizer.timing }}</p>{% endif %}
+            </div>
+            {% endif %}
+        </section>
+
+        <aside class="panel">
+            <div class="section-heading">
+                <p class="eyebrow">{{ t('Field snapshot') }}</p>
+                <h2>{{ t('Inputs') }}</h2>
+            </div>
+            <dl class="detail-list">
+                <div>
+                    <dt>{{ t('Nitrogen') }}</dt>
+                    <dd>{{ prediction.nitrogen or 0 }}</dd>
+                </div>
+                <div>
+                    <dt>{{ t('Phosphorus') }}</dt>
+                    <dd>{{ prediction.phosphorus or 0 }}</dd>
+                </div>
+                <div>
+                    <dt>{{ t('Potassium') }}</dt>
+                    <dd>{{ prediction.potassium or 0 }}</dd>
+                </div>
+                <div>
+                    <dt>{{ t('pH') }}</dt>
+                    <dd>{{ prediction.ph or 'N/A' }}</dd>
+                </div>
+                <div>
+                    <dt>{{ t('Temperature') }}</dt>
+                    <dd>{{ prediction.temperature or 'N/A' }} °C</dd>
+                </div>
+                <div>
+                    <dt>{{ t('Humidity') }}</dt>
+                    <dd>{{ prediction.humidity or 0 }}%</dd>
+                </div>
+                <div>
+                    <dt>{{ t('Rainfall') }}</dt>
+                    <dd>{{ prediction.rainfall or 0 }} mm</dd>
+                </div>
+                <div>
+                    <dt>{{ t('Moisture') }}</dt>
+                    <dd>{{ prediction.moisture or 0 }}%</dd>
+                </div>
+                <div>
+                    <dt>{{ t('Rate') }}</dt>
+                    <dd>{{ prediction.amount or 0 }} kg/ha</dd>
+                </div>
+            </dl>
+        </aside>
+    </div>
+
+    {% if prediction.raw_response %}
+    <section class="panel">
+        <div class="section-heading">
+            <p class="eyebrow">{{ t('AI note') }}</p>
+            <h2>{{ t('Enrichment') }}</h2>
+        </div>
+        <pre class="response-box">{{ prediction.raw_response }}</pre>
+    </section>
+    {% endif %}
+</section>
+{% endblock %}

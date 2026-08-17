@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" data-language="{{ lang }}">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="brand" href="{{ url_for('index') }}">
+            <span class="brand-mark">AN</span>
+            <span>{{ app_name }}</span>
+        </a>
+        <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
+        <nav class="nav">
+            <a href="{{ url_for('index') }}">{{ t('Yield Planner') }}</a>
+            <a href="{{ url_for('crop_recommendation') }}">{{ t('Crop Advisor') }}</a>
+            <a href="{{ url_for('fertilizer_recommend') }}">{{ t('Fertilizer') }}</a>
+            {% if current_user %}
+            <a href="{{ url_for('chat') }}">{{ t('Chatbot') }}</a>
+            <a href="{{ url_for('all_responses') }}">{{ t('History') }}</a>
+            <a href="{{ url_for('account') }}">{{ t('Account') }}</a>
+            <a class="nav-cta" href="{{ url_for('logout') }}">{{ t('Logout') }}</a>
+            {% else %}
+            <a href="{{ url_for('login') }}">{{ t('Login') }}</a>
+            <a class="nav-cta" href="{{ url_for('register') }}">{{ t('Register') }}</a>
+            {% endif %}
+            <a href="{{ url_for('crop_disease') }}">{{ t('Disease') }}</a>
+            <a href="{{ url_for('about') }}">{{ t('About') }}</a>
+            <a href="{{ url_for('developer') }}">{{ t('Developer') }}</a>
+            <span class="language-switch">
+                {{ t('Language') }}:
+                <a href="{{ url_for('set_language', lang='en') }}">{{ t('English') }}</a>
+                <a href="{{ url_for('set_language', lang='ne') }}">{{ t('Nepali') }}</a>
+            </span>
+        </nav>
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="flash-stack">
+            {% for message in messages %}
+            <div class="alert notice">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <span>{{ app_name }} field intelligence</span>
+        <a href="{{ url_for('developer') }}">{{ t('Developer') }}</a>
+    </footer>
+    <script>
+        (function() {
+            const btn = document.getElementById('nav-toggle');
+            const nav = document.querySelector('.nav');
+            if (!btn || !nav) return;
+            btn.addEventListener('click', function() {
+                nav.classList.toggle('show');
+            });
+            // close nav when clicking outside on mobile
+            document.addEventListener('click', function(e) {
+                if (!nav.classList.contains('show')) return;
+                if (e.target === btn || nav.contains(e.target)) return;
+                nav.classList.remove('show');
+            });
+        })();
+    </script>
+</body>
+
+</html>

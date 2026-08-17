@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} | {{ t('Crop Advisor') }}{% endblock %}
+{% block content %}
+<section class="workspace">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">{{ t('Crop advisor') }}</p>
+            <h1>{{ t('Match crops to soil and weather') }}</h1>
+        </div>
+        <img src="{{ url_for('static', filename='images/crop-planning.jpg') }}" alt="Crop planning">
+    </div>
+
+    {% if error %}
+    <div class="alert error">{{ error }}</div>
+    {% endif %}
+
+    <div class="layout-grid">
+        <section class="panel">
+            <form action="{{ url_for('crop_recommendation') }}" method="POST" class="form-grid compact">
+                <label>{{ t('Nitrogen (N)') }}
+                    <input type="number" name="nitrogen" min="0" max="250" step="0.1" value="60" required>
+                </label>
+                <label>{{ t('Phosphorus (P)') }}
+                    <input type="number" name="phosphorus" min="0" max="250" step="0.1" value="45" required>
+                </label>
+                <label>{{ t('Potassium (K)') }}
+                    <input type="number" name="potassium" min="0" max="250" step="0.1" value="40" required>
+                </label>
+                <label>{{ t('Temperature (C)') }}
+                    <input type="number" name="temperature" min="-5" max="60" step="0.1" value="24" required>
+                </label>
+                <label>{{ t('Humidity (%)') }}
+                    <input type="number" name="humidity" min="0" max="100" step="0.1" value="70" required>
+                </label>
+                <label>{{ t('Soil Moisture (%)') }}
+                    <input type="number" name="moisture" min="0" max="100" step="0.1" value="45" required>
+                </label>
+                <label>{{ t('Soil pH') }}
+                    <input type="number" name="ph" min="3" max="10" step="0.1" value="6.6" required>
+                </label>
+                <label>{{ t('Rainfall (mm)') }}
+                    <input type="number" name="rainfall" min="0" max="500" step="0.1" value="180" required>
+                </label>
+                <label>{{ t('Target crop') }}
+                    <select name="crop" required>
+                        {% for crop_option in crops %}
+                        <option value="{{ crop_option }}" {% if request.form.get('crop') == crop_option %}selected{% endif %}>{{ crop_option }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>{{ t('Fertilizer amount (kg/ha)') }}
+                    <input type="number" name="amount" min="0" max="1000" step="0.1" value="100" required>
+                </label>
+                <label>{{ t('Location (district/state)') }}
+                    <div class="field-with-button">
+                        <input id="location-input" type="text" name="location" placeholder="{{ t('Enter district/state') }}" value="{{ result.location if result.location is defined else '' }}">
+                        <button id="weather-button" type="button">{{ t('Fetch weather') }}</button>
+                    </div>
+                </label>
+                <p id="weather-status" class="muted"></p>
+                <div class="form-actions">
+                    <button type="submit">{{ t('Recommend Crops') }}</button>
+                </div>
+            </form>
+        </section>
+
+        <aside class="panel">
+            <div class="section-heading">
+                <p class="eyebrow">{{ t('Ranked output') }}</p>
+                <h2>{{ t('Best Fits') }}</h2>
+            </div>
+            {% if result %}
+            <div class="panel-card">
+                <h3>{{ t('ML recommendation') }}</h3>
+                <p class="muted">{{ result.ml_summary }}</p>
+                <p class="muted">{{ t('Location') }}: {{ result.location or 'Not specified' }}</p>
+                <div class="result-stack">
+                    {% for item in result.ml_results|default(result.results, true) %}
+                    <article class="result-card">
+                        <div>
+                            <h3>{{ item.crop }}</h3>
+                            <p>{{ item.why }}</p>
+                            <p class="muted">Estimated market value: {{ item.market_price }}</p>
+                        </div>
+                        <span class="score">{{ item.score }}%</span>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="panel-card">
+                <h3>{{ t('AI advisor') }}</h3>
+                <p>{{ result.ai_summary }}</p>
+                <p class="muted">{{ t('Provider') }}: {{ result.ai_provider }}</p>
+            </div>
+            <div class="panel-card">
+                <h3>{{ t('Fertilizer impact') }}</h3>
+                <p><strong>{{ t('Projected yield') }}:</strong> {{ result.yield_range }}</p>
+                <p><strong>{{ t('Estimated return') }}:</strong> {{ result.market_price }}</p>
+                <p><strong>{{ t('Risk level') }}:</strong> {{ result.risk_level }}</p>
+                <p class="muted">{{ result.impact_summary }}</p>
+                <div class="result-stack">
+                    {% for action in result.actions %}
+                    <p>• {{ action }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <p class="muted">{{ t('Submit soil and climate values to rank crop options.') }}</p>
+            {% endif %}
+        </aside>
+    </div>
+</section>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const weatherButton = document.getElementById('weather-button');
+        const locationInput = document.getElementById('location-input');
+        const status = document.getElementById('weather-status');
+
+        if (!weatherButton || !locationInput || !status) {
+            return;
+        }
+
+        weatherButton.addEventListener('click', async function() {
+            const location = locationInput.value.trim();
+            if (!location) {
+                status.textContent = '{{ t("Enter a location to fetch weather.") }}';
+                return;
+            }
+            status.textContent = '{{ t("Fetching live weather...") }}';
+            weatherButton.disabled = true;
+            try {
+                const response = await fetch(`{{ url_for('live_weather') }}?q=${encodeURIComponent(location)}`);
+                const body = await response.json();
+                if (!response.ok || !body.success) {
+                    status.textContent = body.error || '{{ t("Live weather lookup failed.") }}';
+                } else {
+                    const weather = body.weather || {};
+                    const temp = weather.temperature !== undefined ? weather.temperature : '';
+                    const humidity = weather.humidity !== undefined ? weather.humidity : '';
+                    const rainfall = weather.rainfall !== undefined ? weather.rainfall : '';
+                    document.querySelector('input[name="temperature"]').value = temp;
+                    document.querySelector('input[name="humidity"]').value = humidity;
+                    document.querySelector('input[name="rainfall"]').value = rainfall;
+                    status.textContent = '{{ t("Weather updated from live data.") }}';
+                }
+            } catch (err) {
+                status.textContent = '{{ t("Live weather lookup failed.") }}';
+            } finally {
+                weatherButton.disabled = false;
+            }
+        });
+    });
+</script>
+{% endblock %}

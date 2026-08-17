@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} | {{ t('Fertilizer impact') }}{% endblock %}
+{% block content %}
+<section class="workspace">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">{{ t('Fertilizer impact') }}</p>
+            <h1>{{ t('Understand fertilizer effect on yield') }}</h1>
+        </div>
+        <img src="{{ url_for('static', filename='images/soil-lab.jpg') }}" alt="Fertilizer impact">
+    </div>
+
+    {% if error %}
+    <div class="alert error">{{ error }}</div>
+    {% endif %}
+
+    <div class="layout-grid">
+        <section class="panel">
+            <form action="{{ url_for('fertilizer_impact') }}" method="POST" class="form-grid compact">
+                <label>{{ t('Crop') }}
+                    <select name="crop" required>
+                        {% for crop in crops %}
+                        <option value="{{ crop }}" {% if initial_values.crop == crop %}selected{% endif %}>{{ crop }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>{{ t('Soil') }}
+                    <select name="soil" required>
+                        {% for soil in soils %}
+                        <option value="{{ soil }}" {% if initial_values.soil == soil %}selected{% endif %}>{{ soil }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>{{ t('Temperature (C)') }}
+                    <input type="number" name="temperature" min="-5" max="60" step="0.1" value="{{ initial_values.temperature }}" required>
+                </label>
+                <label>{{ t('Humidity (%)') }}
+                    <input type="number" name="humidity" min="0" max="100" step="0.1" value="{{ initial_values.humidity }}" required>
+                </label>
+                <label>{{ t('Soil Moisture (%)') }}
+                    <input type="number" name="moisture" min="0" max="100" step="0.1" value="{{ initial_values.moisture }}" required>
+                </label>
+                <label>{{ t('Nitrogen (N)') }}
+                    <input type="number" name="nitrogen" min="0" max="250" step="0.1" value="{{ initial_values.nitrogen }}" required>
+                </label>
+                <label>{{ t('Phosphorus (P)') }}
+                    <input type="number" name="phosphorus" min="0" max="250" step="0.1" value="{{ initial_values.phosphorus }}" required>
+                </label>
+                <label>{{ t('Potassium (K)') }}
+                    <input type="number" name="potassium" min="0" max="250" step="0.1" value="{{ initial_values.potassium }}" required>
+                </label>
+                <label>{{ t('Soil pH') }}
+                    <input type="number" name="ph" min="3" max="10" step="0.1" value="{{ initial_values.ph }}" required>
+                </label>
+                <label>{{ t('Rainfall (mm)') }}
+                    <input type="number" name="rainfall" min="0" max="500" step="0.1" value="{{ initial_values.rainfall }}" required>
+                </label>
+                <label>{{ t('Fertilizer amount (kg/ha)') }}
+                    <input type="number" name="amount" min="0" max="1000" step="0.1" value="{{ initial_values.amount }}" required>
+                </label>
+                <div class="form-actions">
+                    <button type="submit">{{ t('Predict fertilizer impact') }}</button>
+                </div>
+            </form>
+        </section>
+
+        <aside class="panel">
+            <div class="section-heading">
+                <p class="eyebrow">{{ t('Impact summary') }}</p>
+                <h2>{{ t('Projected yield and fertilization effect') }}</h2>
+            </div>
+
+            {% if result %}
+            <div class="panel-card">
+                <h4>{{ t('Submitted field data') }}</h4>
+                <dl class="detail-list">
+                    <div>
+                        <dt>{{ t('Crop') }}</dt>
+                        <dd>{{ result.inputs.crop }}</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('Soil') }}</dt>
+                        <dd>{{ result.inputs.soil }}</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('Temperature') }}</dt>
+                        <dd>{{ result.inputs.temperature }}°C</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('Humidity') }}</dt>
+                        <dd>{{ result.inputs.humidity }}%</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('Soil Moisture') }}</dt>
+                        <dd>{{ result.inputs.moisture }}%</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('N/P/K') }}</dt>
+                        <dd>{{ result.inputs.N }}/{{ result.inputs.P }}/{{ result.inputs.K }}</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('Soil pH') }}</dt>
+                        <dd>{{ result.inputs.ph }}</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('Rainfall') }}</dt>
+                        <dd>{{ result.inputs.rainfall }} mm</dd>
+                    </div>
+                    <div>
+                        <dt>{{ t('Fertilizer amount') }}</dt>
+                        <dd>{{ result.inputs.amount }} kg/ha</dd>
+                    </div>
+                </dl>
+            </div>
+            <div class="panel-card">
+                <h4>{{ t('Yield estimate') }}</h4>
+                <p><strong>{{ result.yield_range }}</strong></p>
+                <p>{{ result.summary }}</p>
+            </div>
+            <div class="panel-card">
+                <h4>{{ t('Fertilizer recommendation') }}</h4>
+                <p><strong>{{ result.fertilizer_display|default(result.fertilizer) }}</strong></p>
+                <p>{{ result.advisor_summary }}</p>
+            </div>
+            <div class="panel-card">
+                <h4>{{ t('Risk and confidence') }}</h4>
+                <p>{{ t('Confidence') }}: {{ result.confidence }}%</p>
+                <p>{{ t('Risk') }}: {{ result.risk_level }}</p>
+            </div>
+            <div class="panel-card">
+                <h4>{{ t('Actionable notes') }}</h4>
+                <ul>
+                    {% for action in result.actions %}
+                    <li>{{ action }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% else %}
+            <p class="muted">{{ t('Submit your field conditions to see fertilizer impact on projected yield.') }}</p>
+            {% endif %}
+        </aside>
+    </div>
+</section>
+{% endblock %}
